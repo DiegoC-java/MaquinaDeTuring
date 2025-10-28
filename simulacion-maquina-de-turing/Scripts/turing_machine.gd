@@ -37,7 +37,7 @@ var transitions = {
 	"q_resta_inicio": {  # Buscar un 1 en el segundo número
 		"1": ["q_resta_ir_izq", "_", "L"],  # Encontró 1, lo borra y procesa
 		"_": ["q_resta_buscar_mas", "_", "R"],  # Salta espacio, sigue buscando
-		"0": ["q_limpiar", "0", "L"]  # Volvió al separador, terminó
+		"0": ["q_limpiar", "_", "L"]  # Volvió al separador, terminó
 	},
 	"q_resta_buscar_mas": {  # Seguir buscando más 1s hacia la derecha (máximo 3 espacios)
 		"1": ["q_resta_ir_izq", "_", "L"],  # Encontró otro 1!
@@ -53,7 +53,7 @@ var transitions = {
 	},
 	"q_resta_terminar": {  # Regresar al separador para terminar
 		"_": ["q_resta_terminar", "_", "L"],
-		"0": ["q_limpiar", "0", "L"]  # Llegó al separador, limpia
+		"0": ["q_limpiar", "_", "L"]  # Llegó al separador, limpia
 	},
 	"q_resta_ir_izq": {  # Ir hacia la izquierda hasta pasar el separador
 		"1": ["q_resta_ir_izq", "1", "L"],
@@ -75,14 +75,15 @@ var transitions = {
 	},
 	
 	# ===== LIMPIEZA =====
-	"q_limpiar": {  # Limpiar el separador (0) y espacios extras
+	"q_limpiar": {  # Limpiar el separador (0) y espacios extras a la DERECHA del resultado
 		"0": ["q_limpiar", "_", "L"],
-		"1": ["q_ir_inicio", "1", "L"],
+		"1": ["q_ir_inicio", "1", "L"], # Encuentra el resultado, pasa a modo "rebobinar"
 		"_": ["q_limpiar", "_", "L"]
 	},
-	"q_ir_inicio": {  # Ir al inicio de la cinta
-		"1": ["q_ir_inicio", "1", "L"],
-		"_": ["qf", "_", "R"]  # Llegó al inicio, halt
+	"q_ir_inicio": {  # Ir al inicio de la cinta, limpiando CUALQUIER 0 en el camino
+		"1": ["q_ir_inicio", "1", "L"],  # Salta los 1s del resultado
+		"0": ["q_ir_inicio", "_", "L"],  # <-- ¡REGLA AÑADIDA! Si encuentra un 0, lo borra y sigue
+		"_": ["qf", "_", "R"]            # Llegó al espacio en blanco del inicio, halt
 	}
 }
 

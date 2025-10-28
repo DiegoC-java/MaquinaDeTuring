@@ -29,27 +29,49 @@ var transitions = {
 	},
 	"q_suma_escribir": {  # Volver al separador (0)
 		"1": ["q_suma_escribir", "1", "L"],
-		"_": ["q_suma_escribir", "_", "L"],  # ← LÍNEA NUEVA
+		"_": ["q_suma_escribir", "_", "L"],
 		"0": ["q_suma_inicio", "0", "R"]  # Vuelve a buscar más unos del segundo número
 	},
 	
-	# ===== RESTA =====
-	"q_resta_inicio": {  # Buscar el primer 1 del segundo número
-		"1": ["q_resta_borrar_segundo", "_", "L"],  # Borra un 1 del segundo número
-		"_": ["q_limpiar", "_", "L"]  # No hay más en segundo número, termina
+	# ===== RESTA (LÓGICA CORREGIDA CON LÍMITE) =====
+	"q_resta_inicio": {  # Buscar un 1 en el segundo número
+		"1": ["q_resta_ir_izq", "_", "L"],  # Encontró 1, lo borra y procesa
+		"_": ["q_resta_buscar_mas", "_", "R"],  # Salta espacio, sigue buscando
+		"0": ["q_limpiar", "0", "L"]  # Volvió al separador, terminó
 	},
-	"q_resta_borrar_segundo": {  # Volver al separador
-		"1": ["q_resta_borrar_segundo", "1", "L"],
-		"0": ["q_resta_borrar_primero", "0", "L"]  # Llegó al separador, va a borrar del primero
+	"q_resta_buscar_mas": {  # Seguir buscando más 1s hacia la derecha (máximo 3 espacios)
+		"1": ["q_resta_ir_izq", "_", "L"],  # Encontró otro 1!
+		"_": ["q_resta_buscar_mas2", "_", "R"]  # Primer espacio vacío
 	},
-	"q_resta_borrar_primero": {  # Buscar el último 1 del primer número
-		"1": ["q_resta_encontrado", "_", "R"],  # Borra un 1 del primer número
-		"_": ["q_resta_encontrado", "_", "R"]  # (manejo de casos borde)
+	"q_resta_buscar_mas2": {  # Segundo intento
+		"1": ["q_resta_ir_izq", "_", "L"],
+		"_": ["q_resta_buscar_mas3", "_", "R"]  # Segundo espacio vacío
 	},
-	"q_resta_encontrado": {  # Volver al separador
-		"1": ["q_resta_encontrado", "1", "R"],
-		"0": ["q_resta_inicio", "0", "R"],  # Vuelve a buscar más unos del segundo número
-		"_": ["q_resta_inicio", "0", "R"]
+	"q_resta_buscar_mas3": {  # Tercer y último intento
+		"1": ["q_resta_ir_izq", "_", "L"],
+		"_": ["q_resta_terminar", "_", "L"]  # Tres espacios seguidos = terminó
+	},
+	"q_resta_terminar": {  # Regresar al separador para terminar
+		"_": ["q_resta_terminar", "_", "L"],
+		"0": ["q_limpiar", "0", "L"]  # Llegó al separador, limpia
+	},
+	"q_resta_ir_izq": {  # Ir hacia la izquierda hasta pasar el separador
+		"1": ["q_resta_ir_izq", "1", "L"],
+		"_": ["q_resta_ir_izq", "_", "L"],
+		"0": ["q_resta_ir_inicio", "0", "L"]  # Pasó el separador
+	},
+	"q_resta_ir_inicio": {  # Ir hasta el inicio de la cinta
+		"1": ["q_resta_ir_inicio", "1", "L"],
+		"_": ["q_resta_buscar_primero", "_", "R"]  # Llegó al inicio, ahora busca el primer 1
+	},
+	"q_resta_buscar_primero": {  # Buscar el PRIMER 1 del primer número
+		"1": ["q_resta_borrado", "_", "R"],  # Encontró el primer 1, lo borra
+		"_": ["q_resta_buscar_primero", "_", "R"]
+	},
+	"q_resta_borrado": {  # Ya borró, ahora volver al segundo número
+		"1": ["q_resta_borrado", "1", "R"],
+		"_": ["q_resta_borrado", "_", "R"],
+		"0": ["q_resta_inicio", "0", "R"]  # Llegó al separador, vuelve al segundo número
 	},
 	
 	# ===== LIMPIEZA =====
@@ -68,10 +90,8 @@ var transitions = {
 
 func _ready():
 	print("=== MÁQUINA DE TURING INICIADA ===")
-	# Ejemplo de suma: 3 + 2 = 5
-	initialize_tape("11111-11")
 	# Ejemplo de resta: 5 - 2 = 3
-	# initialize_tape("11111-11")
+	initialize_tape("11111-11")
 	print_tape()
 
 func initialize_tape(input_string: String):

@@ -11,11 +11,26 @@ var halt = false  # Si la máquina se detuvo
 # Dirección: "L" = izquierda, "R" = derecha, "N" = no mover
 var transitions = {
 	# ===== ESTADOS INICIALES =====
-	"q0": {  # Buscar el operador
-		"1": ["q0", "1", "R"],  # Avanza sobre los unos del primer número
-		"+": ["q_suma_inicio", "0", "R"],  # Detectó suma, marca con 0 y va a sumar
-		"-": ["q_resta_inicio", "0", "R"],  # Detectó resta, marca con 0 y va a restar
-		"_": ["qf", "_", "N"]  # Celda vacía, halt
+	# ===== ESTADOS INICIALES (CORREGIDOS) =====
+	"q0": {  # Ver el primer símbolo
+		"1": ["q0_skip_ones", "1", "R"],  # Es un numero > 0, ir a saltar 1s
+		"+": ["q_suma_inicio", "0", "R"],  # Suma (Ej: "+11", asume 0+11)
+		"-": ["q_resta_inicio", "0", "R"],  # Resta (Ej: "-11", asume 0-11)
+		"_": ["q_op_search", "_", "R"]    # Es 0 (nulo), ir a buscar operador
+	},
+	
+	"q0_skip_ones": { # Estado para saltar los 1s del primer número (el q0 original)
+		"1": ["q0_skip_ones", "1", "R"],
+		"+": ["q_suma_inicio", "0", "R"],  # Detectó suma
+		"-": ["q_resta_inicio", "0", "R"],  # Detectó resta
+		"_": ["qf", "_", "N"]              # Fin de cinta (ej: solo "111")
+	},
+
+	"q_op_search": { # Estado si el primer número es 0 (leyó "_")
+		"1": ["qf", "1", "N"],             # Error: "_1" no es válido en unario
+		"+": ["q_suma_inicio", "0", "R"],  # Encontró "0 + ..."
+		"-": ["q_resta_inicio", "0", "R"],  # Encontró "0 - ..."
+		"_": ["qf", "_", "N"]              # Encontró "__", cinta vacía
 	},
 	
 	# ===== SUMA =====
@@ -33,7 +48,7 @@ var transitions = {
 		"0": ["q_suma_inicio", "0", "R"]  # Vuelve a buscar más unos del segundo número
 	},
 	
-	# ===== RESTA (LÓGICA CORREGIDA CON LÍMITE) =====
+	# ===== RESTA  =====
 	"q_resta_inicio": {  # Buscar un 1 en el segundo número
 		"1": ["q_resta_ir_izq", "_", "L"],  # Encontró 1, lo borra y procesa
 		"_": ["q_resta_buscar_mas", "_", "R"],  # Salta espacio, sigue buscando
@@ -66,7 +81,8 @@ var transitions = {
 	},
 	"q_resta_buscar_primero": {  # Buscar el PRIMER 1 del primer número
 		"1": ["q_resta_borrado", "_", "R"],  # Encontró el primer 1, lo borra
-		"_": ["q_resta_buscar_primero", "_", "R"]
+		"_": ["q_resta_buscar_primero", "_", "R"],
+		"0": ["q_ir_inicio", "_", "L"]
 	},
 	"q_resta_borrado": {  # Ya borró, ahora volver al segundo número
 		"1": ["q_resta_borrado", "1", "R"],
@@ -78,7 +94,7 @@ var transitions = {
 	"q_limpiar": {  # Limpiar el separador (0) y espacios extras a la DERECHA del resultado
 		"0": ["q_limpiar", "_", "L"],
 		"1": ["q_ir_inicio", "1", "L"], # Encuentra el resultado, pasa a modo "rebobinar"
-		"_": ["q_limpiar", "_", "L"]
+		"_": ["q_ir_inicio", "_", "L"] #cambio de qr_ir_final
 	},
 	"q_ir_inicio": {  # Ir al inicio de la cinta, limpiando CUALQUIER 0 en el camino
 		"1": ["q_ir_inicio", "1", "L"],  # Salta los 1s del resultado
@@ -92,7 +108,7 @@ var transitions = {
 func _ready():
 	print("=== MÁQUINA DE TURING INICIADA ===")
 	# Ejemplo de resta: 5 - 2 = 3
-	initialize_tape("11111-11")
+	initialize_tape("1-1")
 	print_tape()
 
 func initialize_tape(input_string: String):

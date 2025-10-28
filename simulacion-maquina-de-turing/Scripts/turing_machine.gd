@@ -5,6 +5,7 @@ var current_state = "q0"  # Estado inicial
 var tape = []  # La cinta (array de símbolos)
 var head_position = 0  # Posición del cabezal
 var halt = false  # Si la máquina se detuvo
+@onready var step_button = $Control/Button
 
 # ====== TABLA DE TRANSICIONES ======
 # Formato: transitions[estado_actual][símbolo_leído] = [nuevo_estado, símbolo_a_escribir, dirección]
@@ -94,12 +95,14 @@ func _ready():
 	# Ejemplo de resta: 5 - 2 = 3
 	initialize_tape("11111-11")
 	print_tape()
+	
+	step_button.pressed.connect(step)
 
 func initialize_tape(input_string: String):
 	"""Inicializa la cinta con una cadena de entrada"""
 	tape.clear()
 	
-	# Agregar espacios vacíos al inicio
+	# Agregar espacios vacíos al inicios
 	for i in range(3):
 		tape.append("_")
 	

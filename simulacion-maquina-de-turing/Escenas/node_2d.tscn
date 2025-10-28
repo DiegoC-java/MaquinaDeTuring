@@ -1,9 +1,17 @@
-[gd_scene load_steps=2 format=3 uid="uid://8kec2nnawslp"]
+[gd_scene load_steps=4 format=3 uid="uid://8kec2nnawslp"]
 
 [ext_resource type="Script" uid="uid://c2l7cjd5kt86d" path="res://Scripts/turing_machine.gd" id="1_h3eif"]
+[ext_resource type="Texture2D" uid="uid://cnr5m2vm4i1nx" path="res://Imagenes/images.jpg" id="2_iijfg"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_iijfg"]
 
 [node name="Node2D" type="Node2D"]
 script = ExtResource("1_h3eif")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(578.93884, 329.59265)
+scale = Vector2(5.0356245, 2.9045706)
+texture = ExtResource("2_iijfg")
 
 [node name="Control" type="Control" parent="."]
 layout_mode = 3
@@ -20,6 +28,7 @@ offset_right = 1155.0
 offset_bottom = 651.0
 
 [node name="Button" type="Button" parent="Control"]
+modulate = Color(0.22920752, 0.49159592, 1, 1)
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.78700006
@@ -30,11 +39,15 @@ offset_left = 0.16290283
 offset_top = -0.27600098
 offset_right = 251.1629
 offset_bottom = 64.724
-text = "Messi"
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_iijfg")
+text = "Avanzar Cinta"
 
 [node name="Label" type="Label" parent="Control/Button"]
 layout_mode = 1
-offset_left = 63.513977
-offset_top = 40.853027
-offset_right = 316.51398
-offset_bottom = 100.85303
+offset_left = -1.0
+offset_top = 4.0
+offset_right = 252.0
+offset_bottom = 64.0
+
+[connection signal="pressed" from="Control/Button" to="." method="_on_button_pressed"]

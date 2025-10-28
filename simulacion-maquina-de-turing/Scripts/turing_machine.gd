@@ -109,7 +109,7 @@ var transitions = {
 func _ready():
 	print("=== MÁQUINA DE TURING INICIADA ===")
 	# Ejemplo de resta: 5 - 2 = 3
-	initialize_tape("1-1")
+	initialize_tape("_-1")
 	print_tape()
 	
 	step_button.pressed.connect(step)
